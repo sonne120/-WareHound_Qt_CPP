@@ -24,35 +24,30 @@ The system follows a Producer-Consumer pattern bridged by a pipe (or equivalent 
 
 ```mermaid
 graph TB
-    subgraph UI_Layer [Qt Application (UI)]
-        style UI_Layer fill:#e1f5fe,stroke:#01579b
+    subgraph UI_Layer [Qt Application - UI]
         MW[MainWindowPipe] -->|Controls| PSI[PipeSnifferIntegrated]
         PSI -->|Updates| PM[PacketModel]
         PM -->|Data| TV[QTableView]
     end
 
     subgraph App_Logic [Application Integration]
-        style App_Logic fill:#fff3e0,stroke:#e65100
         PSI -->|Manages| PR[PacketRunner]
         PR -- Spawns Thread --> CaptureThread((Capture Thread))
         PR -- Spawns Thread --> ReaderThread((Reader Thread))
     end
 
-    subgraph Core_Lib [Sniffer Library (snifferlib)]
-        style Core_Lib fill:#e8f5e9,stroke:#1b5e20
+    subgraph Core_Lib [Sniffer Library - snifferlib]
         CaptureThread -->|Calls| SP[sniffer_pipe]
-        SP -->|Uses| Sniffer[Sniffer (Facade)]
+        SP -->|Uses| Sniffer[Sniffer Facade]
         Sniffer -->|Builds| PC[PacketCapturer]
         Sniffer -->|Subscribes| PD[PacketDispatcher]
         PC -->|Raw Data| PD
     end
 
-    subgraph System [System / Hardware]
-        style System fill:#f3e5f5,stroke:#4a148c
+    subgraph System [System - Hardware]
         PC -->|libpcap/WinPcap| NIC[Network Interface]
     end
 
-    %% Data Flow
     PD -.->|Callback/Struct| SP
     SP -.->|Pipe Write| PR
     ReaderThread -.->|Pipe Read| PR
